@@ -15,6 +15,17 @@ export type Transaction = Camelize<TransactionRow>
 
 export type TransactionFilter = "all" | "spent" | "received" | "debt" | "position"
 
+export type MonthActivityLine = {
+  transactionId: number | null
+  amount: number | null
+  direction: TransactionDirection | null
+  transactionDate: string | null
+  transactionType: string | null
+  categoryId: number | null
+  categoryName: string | null
+  parentCategoryId: number | null
+}
+
 export type TransactionWrite = {
   amount: number
   direction: TransactionDirection

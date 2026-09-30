@@ -1,6 +1,7 @@
 import type { PostgrestError } from "@supabase/supabase-js"
 
 import type {
+  MonthActivityLine,
   TransactionFilter,
   TransactionWithRef,
   TransactionWrite,
@@ -86,6 +87,30 @@ export async function getTransactions(filter: TransactionFilter, search: string,
     transactions: toCamelCase<TransactionWithRef[]>(data) ?? [],
     count: count ?? 0,
   }
+}
+
+export async function getMonthTransactions(start: string, end: string) {
+  const { data, error } = await supabase
+    .from("transactions_with_ref")
+    .select(`
+      transaction_id,
+      amount,
+      direction,
+      transaction_date,
+      transaction_type,
+      category_id,
+      category_name,
+      parent_category_id
+    `)
+    .eq("transaction_type", "category")
+    .gte("transaction_date", start)
+    .lte("transaction_date", end)
+    .order("transaction_date", { ascending: true })
+    .order("transaction_id", { ascending: true })
+
+  if (error) throw new Error("Could not load this month.")
+
+  return toCamelCase<MonthActivityLine[]>(data) ?? []
 }
 
 export async function createTransaction(transaction: TransactionWrite) {

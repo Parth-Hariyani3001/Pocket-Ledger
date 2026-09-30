@@ -58,6 +58,13 @@ export function describeExpenseBudgets(budgets: BudgetWithUsage[]) {
   return expenseSentence(budgets)
 }
 
+export function expenseBudgetBalance(budgets: BudgetWithUsage[]) {
+  const expenses = budgets.filter((budget) => budget.category.categoryType === "expense")
+  if (!expenses.length) return null
+  const { amount, spent } = totals(expenses)
+  return { amount, spent, left: amount - spent }
+}
+
 export function describeIncomeBudgets(budgets: BudgetWithUsage[]) {
   return incomeSentence(budgets)
 }
