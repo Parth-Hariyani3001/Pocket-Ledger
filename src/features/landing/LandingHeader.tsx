@@ -1,5 +1,5 @@
 import { Menu, Moon, Sun, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router-dom"
 
 import Logo from "@/components/Logo"
@@ -19,16 +19,23 @@ function LandingHeader({
   const {
     context: { isDarkMode, toggleDarkMode },
   } = useTheme()
+  const sentinelRef = useRef<HTMLDivElement>(null)
   const [raised, setRaised] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setRaised(window.scrollY > 8)
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(([entry]) => {
+      setRaised(!entry.isIntersecting)
+    })
+    observer.observe(sentinel)
+    return () => observer.disconnect()
   }, [])
 
   return (
+    <>
+    <div ref={sentinelRef} className="site-header-sentinel" aria-hidden="true" />
     <header className={raised ? "site-header is-raised" : "site-header"}>
       <div className="site-header-bar">
         <Link to="/landing" className="site-logo">
@@ -80,6 +87,7 @@ function LandingHeader({
         </button>
       </div>
     </header>
+    </>
   )
 }
 

@@ -27,6 +27,7 @@ function TransactionItem({ transaction, onEdit }: TransactionItemProps) {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const title = lineTitle(transaction)
   const isDebt = transaction.transactionType === "debt"
+  const isPosition = transaction.transactionType === "position"
 
   return (
     <div className="flex items-center justify-between gap-4 py-3">
@@ -44,6 +45,7 @@ function TransactionItem({ transaction, onEdit }: TransactionItemProps) {
         >
           {signedAmount(Number(transaction.amount), transaction.direction)}
         </p>
+        <div className="book-actions flex items-center gap-1">
         <Button
           type="button"
           variant="ghost"
@@ -62,6 +64,7 @@ function TransactionItem({ transaction, onEdit }: TransactionItemProps) {
         >
           <Trash2 />
         </Button>
+        </div>
       </div>
 
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
@@ -71,7 +74,9 @@ function TransactionItem({ transaction, onEdit }: TransactionItemProps) {
             <AlertDialogDescription>
               {isDebt
                 ? "This also changes what is left with this person."
-                : "This removes the line from your book."}
+                : isPosition
+                  ? "This also changes how much you have contributed."
+                  : "This removes the line from your book."}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

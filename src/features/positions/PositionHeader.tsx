@@ -3,21 +3,24 @@ import { Plus } from "lucide-react"
 import PageHeading from "@/components/PageHeading"
 import SegmentedFilter from "@/components/SegmentedFilter"
 import { Button } from "@/components/ui/button"
+import type { PositionWithStatus } from "@/types/position"
+import { describePositions } from "./positionCopy"
 
-interface TransactionHeaderProps {
+interface PositionHeaderProps {
+  positions: PositionWithStatus[]
   onAdd: () => void
 }
 
-function TransactionHeader({ onAdd }: TransactionHeaderProps) {
+function PositionHeader({ positions, onAdd }: PositionHeaderProps) {
   return (
     <div className="flex flex-col gap-4">
       <PageHeading
-        title="Transactions"
-        description="Money you spent, received, moved for a debt, or added to a position."
+        title="Positions"
+        description={describePositions(positions)}
         action={
           <Button type="button" onClick={onAdd}>
             <Plus data-icon="inline-start" />
-            Add transaction
+            Add position
           </Button>
         }
       />
@@ -27,10 +30,10 @@ function TransactionHeader({ onAdd }: TransactionHeaderProps) {
           defaultValue="all"
           options={[
             { label: "All", value: "all" },
-            { label: "Spent", value: "spent" },
-            { label: "Received", value: "received" },
-            { label: "Debts", value: "debt" },
-            { label: "Positions", value: "position" },
+            { label: "SIP", value: "sip" },
+            { label: "FD", value: "fd" },
+            { label: "Savings", value: "savings" },
+            { label: "Emergency", value: "emergency" },
           ]}
         />
       </div>
@@ -38,4 +41,4 @@ function TransactionHeader({ onAdd }: TransactionHeaderProps) {
   )
 }
 
-export default TransactionHeader
+export default PositionHeader

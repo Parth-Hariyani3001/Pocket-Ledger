@@ -1,3 +1,4 @@
+import { format } from "date-fns"
 import { Link } from "react-router-dom"
 
 import PageHeading from "@/components/PageHeading"
@@ -9,40 +10,87 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty"
-import { Skeleton } from "@/components/ui/skeleton"
+import BookLinesSkeleton from "@/components/BookLinesSkeleton"
+import { describeExpenseBudgets, describeIncomeBudgets } from "@/features/budget/budgetCopy"
+import { useBudgets } from "@/features/budget/useBudgets"
 import { useCategories } from "@/features/categories/useCategories"
+import { describeMonth } from "@/features/positions/positionCopy"
+import { usePositions } from "@/features/positions/usePositions"
+import { lineTitle, signedAmount } from "@/features/transactions/transactionCopy"
 import useTransactions from "@/features/transactions/useTransactions"
 import { formatINR } from "@/utils/dateCurrencyUtils"
 
-function signedAmount(amount: number, direction: string | null) {
-  const formatted = formatINR(Math.abs(amount))
-  if (direction === "outflow") return `−${formatted}`
-  if (direction === "inflow") return `+${formatted}`
-  return formatted
+function planLine(sentence: string | null, empty: string) {
+  return sentence ?? empty
 }
 
 function Dashboard() {
   const { transactions, isLoading: transactionsLoading } = useTransactions()
   const { data: categories, isLoading: categoriesLoading } = useCategories()
+  const { budgets, isLoading: budgetsLoading } = useBudgets()
+  const { positions, isLoading: positionsLoading } = usePositions()
 
   const latest = transactions.slice(0, 6)
   const categoryNames = (categories ?? []).filter((category) => !category.parentCategory)
+  const today = format(new Date(), "yyyy-MM-dd")
+  const activeBudgets = budgets.filter(
+    (budget) => budget.startDate <= today && budget.endDate >= today,
+  )
+  const summaryLoading = budgetsLoading || positionsLoading
+  const incomeLine = describeIncomeBudgets(activeBudgets)
+  const expenseLine = describeExpenseBudgets(activeBudgets)
+  const fundingLine = describeMonth(positions)
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeading
         title="Dashboard"
-        description="The latest lines in the book, and the categories they belong to."
+        description="What arrived, what was spent, and what you still hold."
       />
+
+      <section aria-labelledby="plan-title">
+        <h2 id="plan-title" className="text-[1.7rem] font-medium">
+          This month
+        </h2>
+        {summaryLoading ? (
+          <div className="mt-4">
+            <BookLinesSkeleton />
+          </div>
+        ) : (
+          <ul className="book-lines mt-4">
+            <li className="flex items-center justify-between gap-4 py-3">
+              <span>Income</span>
+              <span className="text-right tabular-nums">{planLine(incomeLine, "No income budget")}</span>
+            </li>
+            <li className="flex items-center justify-between gap-4 py-3">
+              <span>Spending</span>
+              <span className="text-right tabular-nums">{planLine(expenseLine, "No expense budget")}</span>
+            </li>
+            <li className="flex items-center justify-between gap-4 py-3">
+              <span>Positions</span>
+              <span className="text-right tabular-nums">{planLine(fundingLine || null, "No monthly amount")}</span>
+            </li>
+          </ul>
+        )}
+        {!positionsLoading && positions.length ? (
+          <ul className="book-lines mt-2">
+            {positions.map((position) => (
+              <li key={position.id} className="flex items-start justify-between gap-4 py-3">
+                <span className="truncate">{position.name}</span>
+                <span className="shrink-0 text-right">
+                  <span className="book-amount">{formatINR(position.balance)}</span>
+                  <span className="mt-1 block text-sm text-muted-foreground">contributed</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
 
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)]">
         <section aria-labelledby="latest-title">
           {transactionsLoading ? (
-            <div className="flex flex-col gap-3" aria-busy="true">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
+            <BookLinesSkeleton />
           ) : latest.length ? (
             <figure className="site-sheet" aria-labelledby="latest-title">
               <figcaption id="latest-title">Latest lines</figcaption>
@@ -51,10 +99,7 @@ function Dashboard() {
                   <li key={transaction.transactionId}>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate">
-                        {transaction.categoryName ||
-                          transaction.counterparty ||
-                          transaction.description ||
-                          "Transaction"}
+                        {lineTitle(transaction)}
                       </span>
                       {transaction.description ? (
                         <span className="block truncate text-sm text-[#d5e2ea]">
@@ -94,10 +139,8 @@ function Dashboard() {
             Categories
           </h2>
           {categoriesLoading ? (
-            <div className="mt-4 flex flex-col gap-3" aria-busy="true">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-full" />
+            <div className="mt-4">
+              <BookLinesSkeleton />
             </div>
           ) : categoryNames.length ? (
             <ul className="book-lines mt-4">

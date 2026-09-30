@@ -57,7 +57,7 @@ function BudgetItem({ budget, onEdit }: BudgetItemProps) {
           <span className="flex min-w-0 flex-col gap-1">
             <span className="truncate font-medium">{title}</span>
             <span className="text-sm text-muted-foreground">
-              {formatDay(budget.startDate)} – {formatDay(budget.endDate)}
+              {formatDay(budget.startDate)} - {formatDay(budget.endDate)}
             </span>
           </span>
         </div>
@@ -71,6 +71,7 @@ function BudgetItem({ budget, onEdit }: BudgetItemProps) {
               {remainderLabel(budget, remaining)}
             </p>
           </div>
+          <div className="book-actions flex items-center gap-1">
           <Button
             type="button"
             variant="ghost"
@@ -89,6 +90,7 @@ function BudgetItem({ budget, onEdit }: BudgetItemProps) {
           >
             <Trash2 />
           </Button>
+          </div>
         </div>
       </div>
 

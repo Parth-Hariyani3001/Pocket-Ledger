@@ -9,7 +9,7 @@ import { PAGE_SIZE } from "../utils/constants"
 import { toCamelCase } from "../utils/toCamelCase"
 import supabase from "./supabase"
 
-const filters = new Set<TransactionFilter>(["all", "spent", "received", "debt"])
+const filters = new Set<TransactionFilter>(["all", "spent", "received", "debt", "position"])
 
 export function asTransactionFilter(value: string | null): TransactionFilter {
   if (value && filters.has(value as TransactionFilter)) return value as TransactionFilter
@@ -30,7 +30,7 @@ function transactionError(error: PostgrestError) {
   }
 
   if (error.code === "23503") {
-    return new Error("That category or person is no longer available.")
+    return new Error("That category, person, or position is no longer available.")
   }
 
   return new Error(error.message)
@@ -51,7 +51,10 @@ export async function getTransactions(filter: TransactionFilter, search: string,
       description,
       category_name,
       category_type,
-      counterparty
+      counterparty,
+      position_id,
+      position_name,
+      position_kind
     `,
     { count: "exact" },
   )
@@ -62,6 +65,8 @@ export async function getTransactions(filter: TransactionFilter, search: string,
     query = query.eq("transaction_type", "category").eq("direction", "inflow")
   } else if (filter === "debt") {
     query = query.eq("transaction_type", "debt")
+  } else if (filter === "position") {
+    query = query.eq("transaction_type", "position")
   }
 
   const term = search.trim().replace(/[%_]/g, "")

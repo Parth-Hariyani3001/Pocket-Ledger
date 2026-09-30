@@ -24,6 +24,10 @@ const holdings = [
     title: "Debts in the same book",
     description: "What you owe and what you are owed sit beside rent, not in another app.",
   },
+  {
+    title: "Money you still own",
+    description: "SIP, FD, savings, and an emergency fund keep a balance after the money leaves spending.",
+  },
 ]
 
 const questions = [
@@ -37,7 +41,7 @@ const questions = [
   },
   {
     q: "What can I record?",
-    a: "Everyday categories, and money you owe or are owed.",
+    a: "Everyday categories, debts, and positions such as a SIP or an emergency fund.",
   },
 ]
 
@@ -51,6 +55,11 @@ export default function Landing() {
 
   return (
     <div className="site">
+      <LandingHeader
+        onGetStarted={onGetStarted}
+        toggleMobileMenu={() => setMobileMenuOpen((open) => !open)}
+        mobileMenuOpen={mobileMenuOpen}
+      />
       <div className="site-top">
         <svg
           className="site-road"
@@ -66,17 +75,11 @@ export default function Landing() {
             strokeLinecap="butt"
           />
         </svg>
-        <LandingHeader
-          onGetStarted={onGetStarted}
-          toggleMobileMenu={() => setMobileMenuOpen((open) => !open)}
-          mobileMenuOpen={mobileMenuOpen}
-        />
-
         <section className="site-hero" aria-labelledby="hero-title">
           <div className="site-hero-copy">
             <h1 id="hero-title">Keep a clear record of the money you move.</h1>
             <p>
-              Income, spending, and debts live in one book. Each
+              Income, spending, debts, and positions live in one book. Each
               amount sits on the right.
             </p>
             <div className="site-hero-actions">
@@ -155,7 +158,7 @@ export default function Landing() {
 
       <section className="site-close" aria-labelledby="close-title">
         <h2 id="close-title">Sign in and write the next line.</h2>
-        <button type="button" className="site-pill site-pill-light" onClick={onGetStarted}>
+        <button type="button" className="site-pill" onClick={onGetStarted}>
           Sign in
         </button>
       </section>

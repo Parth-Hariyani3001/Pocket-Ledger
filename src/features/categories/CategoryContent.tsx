@@ -65,7 +65,7 @@ export function CategoryActions({
 
   return (
     <>
-      <div className="flex shrink-0 items-center gap-1">
+      <div className="book-actions flex shrink-0 items-center gap-1">
         <Button
           type="button"
           variant="ghost"

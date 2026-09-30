@@ -13,7 +13,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
-import { Skeleton } from "@/components/ui/skeleton"
+import BookLinesSkeleton from "@/components/BookLinesSkeleton"
 import BudgetForm from "@/features/budget/BudgetForm"
 import BudgetHeader from "@/features/budget/BudgetHeader"
 import BudgetItem from "@/features/budget/BudgetItem"
@@ -21,10 +21,14 @@ import { budgetTitle } from "@/features/budget/budgetCopy"
 import { useBudgets } from "@/features/budget/useBudgets"
 import type { BudgetWithUsage } from "@/types/budget"
 
-function matchesWhen(budget: BudgetWithUsage, when: string, today: string) {
-  if (when === "upcoming") return budget.startDate > today
-  if (when === "past") return budget.endDate < today
-  if (when === "active") return budget.startDate <= today && budget.endDate >= today
+function matchesWhen(
+  range: { startDate: string; endDate: string },
+  when: string,
+  today: string,
+) {
+  if (when === "upcoming") return range.startDate > today
+  if (when === "past") return range.endDate < today
+  if (when === "active") return range.startDate <= today && range.endDate >= today
   return true
 }
 
@@ -94,7 +98,7 @@ function Budget() {
     <div className="flex flex-col gap-8">
       <BudgetHeader budgets={described} onAdd={openCreate} />
 
-      <InputGroup>
+      <InputGroup className="max-w-xl">
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
@@ -107,11 +111,7 @@ function Budget() {
       </InputGroup>
 
       {isLoading ? (
-        <div className="flex flex-col gap-3" aria-busy="true">
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-          <Skeleton className="h-20 w-full" />
-        </div>
+        <BookLinesSkeleton />
       ) : visible.length ? (
         <ul className="book-lines">
           {visible.map((budget) => (
@@ -142,7 +142,7 @@ function Budget() {
           if (!open) closeForm()
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <BudgetForm
             key={editingBudget?.id ?? "new"}
             editingBudget={editingBudget}

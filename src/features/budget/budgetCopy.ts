@@ -25,31 +25,41 @@ function totals(budgets: BudgetWithUsage[]) {
   )
 }
 
+function expenseSentence(budgets: BudgetWithUsage[]) {
+  const expenses = budgets.filter((budget) => budget.category.categoryType === "expense")
+  if (!expenses.length) return null
+  const { amount, spent } = totals(expenses)
+  const left = amount - spent
+  return left >= 0
+    ? `${formatINR(left)} left of ${formatINR(amount)} in expenses`
+    : `${formatINR(Math.abs(left))} over ${formatINR(amount)} in expenses`
+}
+
+function incomeSentence(budgets: BudgetWithUsage[]) {
+  const income = budgets.filter((budget) => budget.category.categoryType === "income")
+  if (!income.length) return null
+  const { amount, spent } = totals(income)
+  return `${formatINR(spent)} received of ${formatINR(amount)} in income`
+}
+
 export function describeBudgets(budgets: BudgetWithUsage[]) {
   if (!budgets.length) {
     return "A limit for each parent category, for the dates you choose."
   }
 
-  const sentences: string[] = []
-  const expenses = budgets.filter((budget) => budget.category.categoryType === "expense")
-  const income = budgets.filter((budget) => budget.category.categoryType === "income")
-
-  if (expenses.length) {
-    const { amount, spent } = totals(expenses)
-    const left = amount - spent
-    sentences.push(
-      left >= 0
-        ? `${formatINR(left)} left of ${formatINR(amount)} in expenses`
-        : `${formatINR(Math.abs(left))} over ${formatINR(amount)} in expenses`,
-    )
-  }
-
-  if (income.length) {
-    const { amount, spent } = totals(income)
-    sentences.push(`${formatINR(spent)} received of ${formatINR(amount)} in income`)
-  }
+  const sentences = [expenseSentence(budgets), incomeSentence(budgets)].filter(
+    (sentence): sentence is string => Boolean(sentence),
+  )
 
   return `${sentences.join(". ")}.`
+}
+
+export function describeExpenseBudgets(budgets: BudgetWithUsage[]) {
+  return expenseSentence(budgets)
+}
+
+export function describeIncomeBudgets(budgets: BudgetWithUsage[]) {
+  return incomeSentence(budgets)
 }
 
 export function budgetTitle(

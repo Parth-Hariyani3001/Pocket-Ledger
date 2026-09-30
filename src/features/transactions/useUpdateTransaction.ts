@@ -8,6 +8,7 @@ function refreshLedger(queryClient: ReturnType<typeof useQueryClient>) {
   queryClient.invalidateQueries({ queryKey: ["transactions"] })
   queryClient.invalidateQueries({ queryKey: ["debts"] })
   queryClient.invalidateQueries({ queryKey: ["budgets"] })
+  queryClient.invalidateQueries({ queryKey: ["positions"] })
 }
 
 export function useUpdateTransaction() {

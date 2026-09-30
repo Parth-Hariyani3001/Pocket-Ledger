@@ -16,6 +16,7 @@ const Categories = lazy(() => import("./pages/Categories"))
 const Transactions = lazy(() => import("./pages/Transactions"))
 const Budget = lazy(() => import("./pages/Budget"))
 const Debts = lazy(() => import("./pages/Debts"))
+const Positions = lazy(() => import("./pages/Positions"))
 
 const STALE_TIME = 200
 const client = new QueryClient({
@@ -32,7 +33,7 @@ function App() {
       <QueryClientProvider client={client}>
         <ReactQueryDevtools initialIsOpen={false} />
         <BrowserRouter>
-          <Suspense fallback={null}>
+          <Suspense fallback={<div className="min-h-[100dvh] bg-background" />}>
             <Routes>
               <Route path="/landing" element={<Landing />} />
               <Route path="/signin" element={<Login />} />
@@ -49,6 +50,7 @@ function App() {
                 <Route path="categories" element={<Categories />} />
                 <Route path="budget" element={<Budget />} />
                 <Route path="debts" element={<Debts />} />
+                <Route path="positions" element={<Positions />} />
                 <Route path="transactions" element={<Transactions />} />
               </Route>
             </Routes>

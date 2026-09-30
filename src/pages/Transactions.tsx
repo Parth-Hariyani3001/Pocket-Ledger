@@ -13,7 +13,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
-import { Skeleton } from "@/components/ui/skeleton"
+import BookLinesSkeleton from "@/components/BookLinesSkeleton"
 import TransactionForm from "@/features/transactions/TransactionForm"
 import TransactionHeader from "@/features/transactions/TransactionHeader"
 import TransactionList from "@/features/transactions/TransactionList"
@@ -50,9 +50,16 @@ function emptyCopy(filter: TransactionFilter, searching: boolean) {
     }
   }
 
+  if (filter === "position") {
+    return {
+      title: "No position movements yet",
+      description: "Contributions and withdrawals show up here.",
+    }
+  }
+
   return {
     title: "No transactions yet",
-    description: "Add money you spent, received, or moved for a debt.",
+    description: "Add money you spent, received, moved for a debt, or added to a position.",
   }
 }
 
@@ -106,24 +113,20 @@ function Transactions() {
     <div className="flex flex-col gap-8">
       <TransactionHeader onAdd={openCreate} />
 
-      <InputGroup>
+      <InputGroup className="max-w-xl">
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
         <InputGroupInput
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search notes, categories, or people"
+          placeholder="Search notes, categories, people, or positions"
           type="text"
         />
       </InputGroup>
 
       {isLoading ? (
-        <div className="flex flex-col gap-3" aria-busy="true">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
+        <BookLinesSkeleton />
       ) : transactions.length ? (
         <div className="flex flex-col gap-4">
           <TransactionList transactions={transactions} onEdit={openEdit} />
@@ -151,7 +154,7 @@ function Transactions() {
           if (!open) closeForm()
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <TransactionForm
             key={editingTransaction?.transactionId ?? "new"}
             editingTransaction={editingTransaction}

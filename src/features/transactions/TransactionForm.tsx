@@ -31,7 +31,15 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useGetChildCategories } from "@/features/categories/useGetChildCategories"
 import { debtActionLabel, debtDirection, remainingLabel } from "@/features/debt/debtCopy"
 import { useDebts } from "@/features/debt/useDebts"
+import {
+  positionActionLabel,
+  positionActionOf,
+  positionDirection,
+  positionKindLabel,
+} from "@/features/positions/positionCopy"
+import { usePositions } from "@/features/positions/usePositions"
 import type { DebtAction } from "@/types/debt"
+import type { PositionAction } from "@/types/position"
 import type { TransactionDirection, TransactionWithRef, TransactionWrite } from "@/types/transactions"
 import { formatINR } from "@/utils/dateCurrencyUtils"
 import { debtActionOf, entryKind, type EntryKind } from "./transactionCopy"
@@ -69,25 +77,33 @@ function TransactionForm({ editingTransaction, onClose }: TransactionFormProps) 
       categoryId: editingTransaction?.categoryId ? String(editingTransaction.categoryId) : "",
       debtId: editingTransaction?.debtId ? String(editingTransaction.debtId) : "",
       debtAction: debtActionOf(editingTransaction?.debtType, editingTransaction?.direction),
+      positionId: editingTransaction?.positionId ? String(editingTransaction.positionId) : "",
+      positionAction: positionActionOf(editingTransaction?.direction),
     },
   })
 
   const kind = watch("kind") as EntryKind
   const selectedDebtId = watch("debtId")
+  const selectedPositionId = watch("positionId")
   const direction = directionFor(kind)
   const recordingDebt = kind === "debt"
+  const recordingPosition = kind === "position"
 
   const { childCategories, isChildCategoriesLoading } = useGetChildCategories(direction)
   const { debts, isLoading: isDebtsLoading } = useDebts(recordingDebt)
+  const { positions, isLoading: isPositionsLoading } = usePositions(recordingPosition)
   const selectedDebt = debts.find((item) => String(item.id) === selectedDebtId)
+  const selectedPosition = positions.find((item) => String(item.id) === selectedPositionId)
   const isBusy =
     isCreating ||
     isUpdating ||
     (direction !== null && isChildCategoriesLoading) ||
-    (recordingDebt && isDebtsLoading)
+    (recordingDebt && isDebtsLoading) ||
+    (recordingPosition && isPositionsLoading)
   const missingSubject =
     (direction !== null && !isChildCategoriesLoading && !childCategories?.length) ||
-    (recordingDebt && !isDebtsLoading && !debts.length)
+    (recordingDebt && !isDebtsLoading && !debts.length) ||
+    (recordingPosition && !isPositionsLoading && !positions.length)
 
   function onSubmit(formData: FieldValues) {
     const amount = Number(formData.amount)
@@ -108,6 +124,19 @@ function TransactionForm({ editingTransaction, onClose }: TransactionFormProps) 
         direction: debtDirection(debt.debtType, formData.debtAction as DebtAction),
         debt_id: debt.id,
         category_id: null,
+        position_id: null,
+      }
+    } else if (entry === "position") {
+      const position = positions.find((item) => String(item.id) === formData.positionId)
+      if (!position) return
+      transaction = {
+        amount,
+        description,
+        transaction_date: transactionDate,
+        direction: positionDirection(formData.positionAction as PositionAction),
+        position_id: position.id,
+        category_id: null,
+        debt_id: null,
       }
     } else {
       const categoryId = Number(formData.categoryId)
@@ -119,6 +148,7 @@ function TransactionForm({ editingTransaction, onClose }: TransactionFormProps) 
         direction: entry === "spent" ? "outflow" : "inflow",
         category_id: categoryId,
         debt_id: null,
+        position_id: null,
       }
     }
 
@@ -140,7 +170,7 @@ function TransactionForm({ editingTransaction, onClose }: TransactionFormProps) 
           {editingTransaction ? "Edit transaction" : "Add a transaction"}
         </DialogTitle>
         <DialogDescription>
-          How much, when, and whether you spent it, received it, or moved it for a debt.
+          How much, when, and whether you spent it, received it, moved it for a debt, or added it to a position.
         </DialogDescription>
       </DialogHeader>
 
@@ -206,11 +236,14 @@ function TransactionForm({ editingTransaction, onClose }: TransactionFormProps) 
                     setValue("categoryId", "")
                     setValue("debtId", "")
                     setValue("debtAction", "decrease")
+                    setValue("positionId", "")
+                    setValue("positionAction", "contribute")
                   }}
                 >
                   <ToggleGroupItem value="spent">Spent</ToggleGroupItem>
                   <ToggleGroupItem value="received">Received</ToggleGroupItem>
                   <ToggleGroupItem value="debt">Debt</ToggleGroupItem>
+                  <ToggleGroupItem value="position">Position</ToggleGroupItem>
                 </ToggleGroup>
               )}
             />
@@ -330,6 +363,84 @@ function TransactionForm({ editingTransaction, onClose }: TransactionFormProps) 
                     </ToggleGroupItem>
                     <ToggleGroupItem value="increase">
                       {debtActionLabel(selectedDebt.debtType, "increase")}
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                )}
+              />
+            </Field>
+          ) : null}
+
+          {recordingPosition ? (
+            <Field data-invalid={errors.positionId ? true : undefined}>
+              <FieldLabel>Position</FieldLabel>
+              {isPositionsLoading ? (
+                <Skeleton className="h-11 w-full" />
+              ) : positions.length ? (
+                <Controller
+                  control={control}
+                  name="positionId"
+                  rules={{ required: "Choose a position" }}
+                  render={({ field }) => (
+                    <Select value={field.value || undefined} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        className="w-full"
+                        aria-invalid={errors.positionId ? true : undefined}
+                      >
+                        <SelectValue placeholder="Choose a position" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {positions.map((item) => (
+                            <SelectItem key={item.id} value={String(item.id)}>
+                              {item.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              ) : (
+                <FieldDescription>
+                  <Link to="/positions" className="underline">
+                    Add a position
+                  </Link>{" "}
+                  before recording a contribution.
+                </FieldDescription>
+              )}
+              {selectedPosition ? (
+                <FieldDescription>
+                  {positionKindLabel(selectedPosition.kind)} · {formatINR(selectedPosition.balance)}{" "}
+                  contributed
+                </FieldDescription>
+              ) : null}
+              {errors.positionId?.message ? (
+                <FieldError>{String(errors.positionId.message)}</FieldError>
+              ) : null}
+            </Field>
+          ) : null}
+
+          {recordingPosition && selectedPosition ? (
+            <Field>
+              <FieldLabel>What happened</FieldLabel>
+              <Controller
+                control={control}
+                name="positionAction"
+                render={({ field }) => (
+                  <ToggleGroup
+                    type="single"
+                    variant="outline"
+                    spacing={0}
+                    value={field.value}
+                    onValueChange={(value) => {
+                      if (value) field.onChange(value)
+                    }}
+                  >
+                    <ToggleGroupItem value="contribute">
+                      {positionActionLabel("contribute")}
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="withdraw">
+                      {positionActionLabel("withdraw")}
                     </ToggleGroupItem>
                   </ToggleGroup>
                 )}

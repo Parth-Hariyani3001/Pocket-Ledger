@@ -3,7 +3,6 @@ import { Outlet } from "react-router-dom"
 
 import { useTheme } from "@/context/ThemeContext"
 import { useUser } from "@/features/auth/useUser"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import Logo from "./Logo"
@@ -21,13 +20,12 @@ function AppLayout() {
     user?.email ||
     "Signed in"
   const email = user?.email ?? ""
-  const initials = name.slice(0, 1).toUpperCase()
 
   return (
     <SidebarProvider>
       <Navigation />
       <SidebarInset>
-        <header className="flex h-14 items-center gap-3 border-b px-4 md:px-8">
+        <header className="flex h-16 items-center gap-3 border-b px-4 md:px-8">
           <SidebarTrigger />
           <Logo className="font-heading text-xl font-medium tracking-[-0.02em] md:hidden" />
           <div className="ml-auto flex items-center gap-2">
@@ -40,10 +38,7 @@ function AppLayout() {
             >
               {isDarkMode ? <Sun /> : <Moon />}
             </Button>
-            <div className="hidden items-center gap-2 sm:flex">
-              <Avatar>
-                <AvatarFallback>{initials}</AvatarFallback>
-              </Avatar>
+            <div className="hidden min-w-0 items-center sm:flex">
               <div className="flex min-w-0 flex-col">
                 <span className="truncate text-sm">{name}</span>
                 {email && name !== email ? (

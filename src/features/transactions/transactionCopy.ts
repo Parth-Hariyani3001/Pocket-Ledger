@@ -2,13 +2,14 @@ import type { DebtAction, DebtType } from "@/types/debt"
 import type { TransactionWithRef } from "@/types/transactions"
 import { formatINR } from "@/utils/dateCurrencyUtils"
 import { debtLineTitle } from "../debt/debtCopy"
+import { positionActionOf, positionLineTitle } from "../positions/positionCopy"
 
-export type EntryKind = "spent" | "received" | "debt"
+export type EntryKind = "spent" | "received" | "debt" | "position"
 
 export function entryKind(transaction: TransactionWithRef | null): EntryKind {
-  if (!transaction || transaction.transactionType === "debt") {
-    return transaction ? "debt" : "spent"
-  }
+  if (!transaction) return "spent"
+  if (transaction.transactionType === "debt") return "debt"
+  if (transaction.transactionType === "position") return "position"
   return transaction.direction === "inflow" ? "received" : "spent"
 }
 
@@ -25,6 +26,9 @@ export function debtActionOf(
 export function lineTitle(transaction: TransactionWithRef) {
   if (transaction.transactionType === "debt") {
     return debtLineTitle(transaction.debtType, transaction.direction, transaction.counterparty)
+  }
+  if (transaction.transactionType === "position") {
+    return positionLineTitle(positionActionOf(transaction.direction), transaction.positionName)
   }
   return transaction.categoryName || "Transaction"
 }

@@ -11,7 +11,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
-import { Skeleton } from "@/components/ui/skeleton"
+import BookLinesSkeleton from "@/components/BookLinesSkeleton"
 import CategoryForm from "@/features/categories/CategoryForm"
 import CategoryHeader from "@/features/categories/CategoryHeader"
 import CategoryItem from "@/features/categories/CategoryItem"
@@ -96,7 +96,7 @@ function Categories() {
         categories={visibleCategories}
       />
 
-      <InputGroup>
+      <InputGroup className="max-w-xl">
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
@@ -109,11 +109,7 @@ function Categories() {
       </InputGroup>
 
       {isLoading ? (
-        <div className="flex flex-col gap-3" aria-busy="true">
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-          <Skeleton className="h-16 w-full" />
-        </div>
+        <BookLinesSkeleton />
       ) : visibleCategories.length ? (
         <ul className="book-lines">
           {visibleCategories.map((cat) => (
@@ -150,7 +146,7 @@ function Categories() {
           if (!open) resetForm()
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <CategoryForm
             editingCategory={editingCategory}
             resetForm={resetForm}

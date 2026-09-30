@@ -13,58 +13,54 @@ import {
 } from "@/components/ui/empty"
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import BookLinesSkeleton from "@/components/BookLinesSkeleton"
-import DebtForm from "@/features/debt/DebtForm"
-import DebtHeader from "@/features/debt/DebtHeader"
-import DebtItem from "@/features/debt/DebtItem"
-import { useDebts } from "@/features/debt/useDebts"
-import type { DebtWithBalance } from "@/types/debt"
+import PositionForm from "@/features/positions/PositionForm"
+import PositionHeader from "@/features/positions/PositionHeader"
+import PositionItem from "@/features/positions/PositionItem"
+import { positionKindLabel } from "@/features/positions/positionCopy"
+import { usePositions } from "@/features/positions/usePositions"
+import type { PositionKind, PositionWithStatus } from "@/types/position"
 
-function byName(a: DebtWithBalance, b: DebtWithBalance) {
-  const aOpen = a.remaining !== 0
-  const bOpen = b.remaining !== 0
-  if (aOpen !== bOpen) return aOpen ? -1 : 1
-  return a.counterparty.localeCompare(b.counterparty)
-}
+const kinds: PositionKind[] = ["sip", "fd", "savings", "emergency"]
 
 function emptyCopy(hasAny: boolean, searching: boolean) {
   if (searching) {
     return {
-      title: "No matching debts",
+      title: "No matching positions",
       description: "Try another name, or clear the search.",
     }
   }
 
   if (!hasAny) {
     return {
-      title: "No debts yet",
-      description: "Add someone you owe, or someone who owes you.",
+      title: "No positions yet",
+      description: "Add a SIP, an FD, savings, or an emergency fund.",
     }
   }
 
   return {
     title: "Nothing in this view",
-    description: "Try the other side, or add a debt.",
+    description: "Try another kind, or add a position.",
   }
 }
 
-function DebtSection({
+function PositionSection({
   title,
-  debts,
+  positions,
   onEdit,
 }: {
   title: string
-  debts: DebtWithBalance[]
-  onEdit: (debt: DebtWithBalance) => void
+  positions: PositionWithStatus[]
+  onEdit: (position: PositionWithStatus) => void
 }) {
-  if (!debts.length) return null
+  if (!positions.length) return null
 
   return (
     <section className="flex flex-col gap-3">
       <h2 className="book-group">{title}</h2>
       <ul className="book-lines">
-        {debts.map((debt) => (
-          <li key={debt.id}>
-            <DebtItem debt={debt} onEdit={onEdit} />
+        {positions.map((position) => (
+          <li key={position.id}>
+            <PositionItem position={position} onEdit={onEdit} />
           </li>
         ))}
       </ul>
@@ -72,48 +68,43 @@ function DebtSection({
   )
 }
 
-function Debts() {
+function Positions() {
   const [searchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState("")
-  const [editingDebt, setEditingDebt] = useState<DebtWithBalance | null>(null)
+  const [editingPosition, setEditingPosition] = useState<PositionWithStatus | null>(null)
   const [formOpen, setFormOpen] = useState(false)
-  const { debts, isLoading } = useDebts()
+  const { positions, isLoading } = usePositions()
 
-  const side = searchParams.get("side") ?? "all"
+  const kind = searchParams.get("kind") ?? "all"
   const query = searchTerm.trim().toLowerCase()
 
-  const visible = debts
-    .filter((debt) => {
-      if (side !== "all" && debt.debtType !== side) return false
-      if (query && !debt.counterparty.toLowerCase().includes(query)) return false
-      return true
-    })
-    .sort(byName)
-
-  const borrowed = visible.filter((debt) => debt.debtType === "borrowed")
-  const lent = visible.filter((debt) => debt.debtType === "lent")
+  const visible = positions.filter((position) => {
+    if (kind !== "all" && position.kind !== kind) return false
+    if (query && !position.name.toLowerCase().includes(query)) return false
+    return true
+  })
 
   function closeForm() {
     setFormOpen(false)
-    setEditingDebt(null)
+    setEditingPosition(null)
   }
 
   function openCreate() {
-    setEditingDebt(null)
+    setEditingPosition(null)
     setFormOpen(true)
   }
 
-  function openEdit(debt: DebtWithBalance) {
-    setEditingDebt(debt)
+  function openEdit(position: PositionWithStatus) {
+    setEditingPosition(position)
     setFormOpen(true)
   }
 
-  const empty = emptyCopy(debts.length > 0, Boolean(query))
-  const showGroups = side === "all"
+  const empty = emptyCopy(positions.length > 0, Boolean(query))
+  const showGroups = kind === "all"
 
   return (
     <div className="flex flex-col gap-8">
-      <DebtHeader debts={debts} onAdd={openCreate} />
+      <PositionHeader positions={positions} onAdd={openCreate} />
 
       <InputGroup className="max-w-xl">
         <InputGroupAddon>
@@ -122,7 +113,7 @@ function Debts() {
         <InputGroupInput
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search debts"
+          placeholder="Search positions"
           type="text"
         />
       </InputGroup>
@@ -132,14 +123,20 @@ function Debts() {
       ) : visible.length ? (
         showGroups ? (
           <div className="flex flex-col gap-8">
-            <DebtSection title="I owe" debts={borrowed} onEdit={openEdit} />
-            <DebtSection title="Owed to me" debts={lent} onEdit={openEdit} />
+            {kinds.map((item) => (
+              <PositionSection
+                key={item}
+                title={positionKindLabel(item)}
+                positions={visible.filter((position) => position.kind === item)}
+                onEdit={openEdit}
+              />
+            ))}
           </div>
         ) : (
           <ul className="book-lines">
-            {visible.map((debt) => (
-              <li key={debt.id}>
-                <DebtItem debt={debt} onEdit={openEdit} />
+            {visible.map((position) => (
+              <li key={position.id}>
+                <PositionItem position={position} onEdit={openEdit} />
               </li>
             ))}
           </ul>
@@ -153,7 +150,7 @@ function Debts() {
           {!query ? (
             <EmptyContent>
               <Button type="button" onClick={openCreate}>
-                Add debt
+                Add position
               </Button>
             </EmptyContent>
           ) : null}
@@ -167,9 +164,9 @@ function Debts() {
         }}
       >
         <DialogContent className="sm:max-w-md">
-          <DebtForm
-            key={editingDebt?.id ?? "new"}
-            editingDebt={editingDebt}
+          <PositionForm
+            key={editingPosition?.id ?? "new"}
+            editingPosition={editingPosition}
             onClose={closeForm}
           />
         </DialogContent>
@@ -178,4 +175,4 @@ function Debts() {
   )
 }
 
-export default Debts
+export default Positions

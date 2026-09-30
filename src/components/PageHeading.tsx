@@ -17,7 +17,7 @@ function PageHeading({ title, description, action }: PageHeadingProps) {
           <p className="max-w-[38ch] text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      {action}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   )
 }

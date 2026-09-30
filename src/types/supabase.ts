@@ -143,6 +143,42 @@ export type Database = {
                 }
                 Relationships: []
             }
+            position: {
+                Row: {
+                    created_at: string
+                    id: number
+                    kind: Database["public"]["Enums"]["position_kind"]
+                    market_value: number | null
+                    monthly_amount: number | null
+                    name: string
+                    notes: string | null
+                    user_id: string
+                    valued_on: string | null
+                }
+                Insert: {
+                    created_at?: string
+                    id?: number
+                    kind: Database["public"]["Enums"]["position_kind"]
+                    market_value?: number | null
+                    monthly_amount?: number | null
+                    name: string
+                    notes?: string | null
+                    user_id?: string
+                    valued_on?: string | null
+                }
+                Update: {
+                    created_at?: string
+                    id?: number
+                    kind?: Database["public"]["Enums"]["position_kind"]
+                    market_value?: number | null
+                    monthly_amount?: number | null
+                    name?: string
+                    notes?: string | null
+                    user_id?: string
+                    valued_on?: string | null
+                }
+                Relationships: []
+            }
             transaction: {
                 Row: {
                     amount: number
@@ -152,6 +188,7 @@ export type Database = {
                     description: string | null
                     direction: Database["public"]["Enums"]["transaction_direction"]
                     id: number
+                    position_id: number | null
                     transaction_date: string
                     user_id: string
                 }
@@ -163,6 +200,7 @@ export type Database = {
                     description?: string | null
                     direction: Database["public"]["Enums"]["transaction_direction"]
                     id?: number
+                    position_id?: number | null
                     transaction_date: string
                     user_id?: string
                 }
@@ -174,6 +212,7 @@ export type Database = {
                     description?: string | null
                     direction?: Database["public"]["Enums"]["transaction_direction"]
                     id?: number
+                    position_id?: number | null
                     transaction_date?: string
                     user_id?: string
                 }
@@ -208,6 +247,9 @@ export type Database = {
                     description: string | null
                     direction: Database["public"]["Enums"]["transaction_direction"] | null
                     parent_category_id: number | null
+                    position_id: number | null
+                    position_kind: Database["public"]["Enums"]["position_kind"] | null
+                    position_name: string | null
                     search_text: string | null
                     transaction_date: string | null
                     transaction_id: number | null
@@ -238,6 +280,7 @@ export type Database = {
         Enums: {
             category_type: "income" | "expense"
             debt_type: "borrowed" | "lent"
+            position_kind: "sip" | "fd" | "savings" | "emergency"
             transaction_direction: "inflow" | "outflow"
         }
         CompositeTypes: {
@@ -368,6 +411,7 @@ export const Constants = {
         Enums: {
             category_type: ["income", "expense"],
             debt_type: ["borrowed", "lent"],
+            position_kind: ["sip", "fd", "savings", "emergency"],
             transaction_direction: ["inflow", "outflow"],
         },
     },

@@ -1,4 +1,4 @@
-import { ArrowRightLeft, HandCoins, Home, Notebook, Target } from "lucide-react"
+import { ArrowRightLeft, HandCoins, Home, Landmark, Notebook, Target } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import Logo from "@/components/Logo"
@@ -19,6 +19,7 @@ const navigationItems: NavigationType[] = [
   { icon: Notebook, label: "Categories", path: "/categories" },
   { icon: Target, label: "Budget", path: "/budget" },
   { icon: HandCoins, label: "Debts", path: "/debts" },
+  { icon: Landmark, label: "Positions", path: "/positions" },
   { icon: ArrowRightLeft, label: "Transactions", path: "/transactions" },
 ]
 

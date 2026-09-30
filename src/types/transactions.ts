@@ -13,7 +13,7 @@ export type TransactionDirection =
 export type TransactionWithRef = Camelize<TransactionWithRefRow>
 export type Transaction = Camelize<TransactionRow>
 
-export type TransactionFilter = "all" | "spent" | "received" | "debt"
+export type TransactionFilter = "all" | "spent" | "received" | "debt" | "position"
 
 export type TransactionWrite = {
   amount: number
@@ -22,4 +22,5 @@ export type TransactionWrite = {
   description: string | null
   category_id: number | null
   debt_id: number | null
+  position_id: number | null
 }

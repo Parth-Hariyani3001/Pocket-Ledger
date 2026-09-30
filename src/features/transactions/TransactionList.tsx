@@ -37,7 +37,7 @@ function TransactionList({ transactions, onEdit }: TransactionListProps) {
     <div className="flex flex-col gap-8">
       {groups.map((group) => (
         <section key={group.date || "undated"} className="flex flex-col gap-3">
-          <h2 className="text-sm text-muted-foreground">{dayLabel(group.date)}</h2>
+          <h2 className="book-group">{dayLabel(group.date)}</h2>
           <ul className="book-lines">
             {group.items.map((transaction) => (
               <li key={transaction.transactionId}>
