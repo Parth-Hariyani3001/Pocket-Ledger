@@ -28,8 +28,8 @@ export async function signin(email: string, password: string) {
 export async function signInWithOAuth(authProvider: Provider) {
     const redirectTo =
         window.location.hostname === "localhost"
-            ? `${window.location.origin}`
-            : import.meta.env.VITE_OAUTH_REDIRECT_URL;
+            ? window.location.origin
+            : import.meta.env.VITE_OAUTH_REDIRECT_URL || window.location.origin;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
         provider: authProvider,

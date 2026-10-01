@@ -1,12 +1,34 @@
+import { useEffect, useState } from "react"
+
 const centerline =
   "M1240 -180C1200 -20 1019 135 942 299C921 345 915 398 925 449C935 499 962 545 1000 579C1039 614 1088 635 1139 639C1358 658 1480 820 1760 900"
 
+function useNarrowScreen() {
+  const [narrow, setNarrow] = useState(() =>
+    typeof window !== "undefined"
+      ? window.matchMedia("(max-width: 767px)").matches
+      : false,
+  )
+
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)")
+    const update = () => setNarrow(query.matches)
+    update()
+    query.addEventListener("change", update)
+    return () => query.removeEventListener("change", update)
+  }, [])
+
+  return narrow
+}
+
 export default function HeroRoad() {
+  const narrow = useNarrowScreen()
+
   return (
     <svg
       className="site-road"
-      viewBox="0 0 1440 780"
-      preserveAspectRatio="xMaxYMin slice"
+      viewBox={narrow ? "860 40 700 740" : "0 0 1440 780"}
+      preserveAspectRatio={narrow ? "xMidYMid slice" : "xMaxYMin slice"}
       aria-hidden="true"
     >
       <defs>
@@ -46,7 +68,14 @@ export default function HeroRoad() {
         >
           <feGaussianBlur stdDeviation="3.5" />
         </filter>
-        <mask id="site-road-reveal" maskUnits="userSpaceOnUse">
+        <mask
+          id="site-road-reveal"
+          maskUnits="userSpaceOnUse"
+          x="-400"
+          y="-400"
+          width="3000"
+          height="1600"
+        >
           <path
             className="site-road-reveal"
             pathLength={1}
