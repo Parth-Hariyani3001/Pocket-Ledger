@@ -43,7 +43,9 @@ function LandingHeader({
         </Link>
 
         <nav className="site-nav" aria-label="Page">
-          <a href="#book">The book</a>
+          <a href="#book">A month</a>
+          <a href="#plan">Categories</a>
+          <a href="#settle">Debts</a>
           <a href="#questions">Questions</a>
         </nav>
 
@@ -77,7 +79,13 @@ function LandingHeader({
 
       <div className="site-menu" data-open={mobileMenuOpen ? "true" : "false"}>
         <a href="#book" onClick={toggleMobileMenu}>
-          The book
+          A month
+        </a>
+        <a href="#plan" onClick={toggleMobileMenu}>
+          Categories
+        </a>
+        <a href="#settle" onClick={toggleMobileMenu}>
+          Debts
         </a>
         <a href="#questions" onClick={toggleMobileMenu}>
           Questions

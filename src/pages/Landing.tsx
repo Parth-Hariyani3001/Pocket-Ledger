@@ -9,26 +9,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import HeroRoad from "../features/landing/HeroRoad"
 import LandingHeader from "../features/landing/LandingHeader"
-
-const holdings = [
-  {
-    title: "Everyday lines",
-    description: "Write income and spending as they happen, with the amount last.",
-  },
-  {
-    title: "Names you already use",
-    description: "Categories follow the words you use at home, and can hold a few smaller ones.",
-  },
-  {
-    title: "Debts in the same book",
-    description: "What you owe and what you are owed sit beside rent, not in another app.",
-  },
-  {
-    title: "Money you still own",
-    description: "SIP, FD, savings, and an emergency fund keep a balance after the money leaves spending.",
-  },
-]
+import { MonthScene, PlanScene, SettleScene } from "../features/landing/ProductScenes"
+import { usePlayOnView } from "../features/landing/usePlayOnView"
 
 const questions = [
   {
@@ -48,6 +32,7 @@ const questions = [
 export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const record = usePlayOnView<HTMLElement>()
 
   const onGetStarted = () => {
     navigate("/signin")
@@ -61,20 +46,7 @@ export default function Landing() {
         mobileMenuOpen={mobileMenuOpen}
       />
       <div className="site-top">
-        <svg
-          className="site-road"
-          viewBox="0 0 1440 780"
-          preserveAspectRatio="xMaxYMin slice"
-          aria-hidden="true"
-        >
-          <path
-            className="site-road-stroke"
-            pathLength={1}
-            d="M1040 -180C780 20 860 200 1120 320C1420 460 1280 560 1620 700"
-            fill="none"
-            strokeLinecap="butt"
-          />
-        </svg>
+        <HeroRoad />
         <section className="site-hero" aria-labelledby="hero-title">
           <div className="site-hero-copy">
             <h1 id="hero-title">Keep a clear record of the money you move.</h1>
@@ -98,51 +70,27 @@ export default function Landing() {
         </section>
       </div>
 
-      <section className="site-section" id="book" aria-labelledby="book-title">
-        <h2 id="book-title">What the book holds</h2>
-        <div className="site-holdings">
-          {holdings.map((item) => (
-            <article key={item.title}>
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <MonthScene />
 
-      <section className="site-band" aria-labelledby="band-title">
-        <div className="site-band-inner">
-          <div>
-            <h2 id="band-title">Written the way a cashbook is written.</h2>
-            <p>
-              A date, a name, and an amount. The page stays quiet so the figures
-              can be read.
-            </p>
-          </div>
-          <dl>
-            <div>
-              <dt>One column</dt>
-              <dd>for every amount</dd>
-            </div>
-            <div>
-              <dt>Same list</dt>
-              <dd>for spending and debts</dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-
-      <section className="site-section site-record" aria-labelledby="record-title">
+      <section
+        ref={record.ref}
+        className="site-section site-record"
+        data-play={record.play ? "true" : "false"}
+        aria-labelledby="record-title"
+      >
         <div>
           <h2 id="record-title">A line is enough.</h2>
           <ul>
             <li>The amount is the last thing on the line.</li>
-            <li>A category can hold a few smaller ones.</li>
-            <li>Borrowed and lent money stay next to rent.</li>
+            <li>Income and spending share the page.</li>
+            <li>What is left is the last figure.</li>
           </ul>
         </div>
         <LedgerStage />
       </section>
+
+      <PlanScene />
+      <SettleScene />
 
       <section className="site-section" id="questions" aria-labelledby="questions-title">
         <h2 id="questions-title">Questions</h2>
@@ -173,7 +121,9 @@ export default function Landing() {
           </div>
           <div>
             <p>Product</p>
-            <a href="#book">The book</a>
+            <a href="#book">A month</a>
+            <a href="#plan">Categories</a>
+            <a href="#settle">Debts</a>
             <a href="#questions">Questions</a>
           </div>
           <div>
