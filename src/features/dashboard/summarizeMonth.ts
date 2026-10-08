@@ -3,7 +3,13 @@ import { eachDayOfInterval, endOfMonth, format, startOfMonth } from "date-fns"
 import type { Category } from "@/types/categories"
 import type { MonthActivityLine } from "@/types/transactions"
 
-const VISIBLE_CATEGORIES = 6
+const FALLBACK_COLORS = [
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-1)",
+]
 
 export type DayPoint = {
   date: string
@@ -14,8 +20,12 @@ export type DayPoint = {
 }
 
 export type CategorySpend = {
+  id: number
   name: string
+  parentId: number | null
+  parentName: string | null
   amount: number
+  share: number
   color: string
 }
 
@@ -45,7 +55,10 @@ export function summarizeMonth(
     received: 0,
   }))
   const byDate = new Map(days.map((day) => [day.date, day]))
-  const byParent = new Map<number, CategorySpend>()
+  const byCategory = new Map<
+    number,
+    Omit<CategorySpend, "share" | "color"> & { color: string | null }
+  >()
 
   let spent = 0
   let received = 0
@@ -66,31 +79,29 @@ export function summarizeMonth(
     spent += amount
     if (day) day.spent += amount
 
-    const parentId = row.parentCategoryId ?? row.categoryId
-    if (parentId == null) continue
-    const parent = byId.get(parentId)
-    const current = byParent.get(parentId) ?? {
-      name: parent?.categoryName ?? row.categoryName ?? "Uncategorized",
+    const filed = row.categoryId != null ? byId.get(row.categoryId) : undefined
+    const parentId = filed?.parentCategory ?? null
+    const parent = parentId != null ? byId.get(parentId) : undefined
+    const id = row.categoryId ?? 0
+    const current = byCategory.get(id) ?? {
+      id,
+      name: filed?.categoryName ?? row.categoryName ?? "Uncategorized",
+      parentId,
+      parentName: parent?.categoryName ?? null,
       amount: 0,
-      color: parent?.color ?? "var(--chart-3)",
+      color: filed?.color ?? null,
     }
     current.amount += amount
-    byParent.set(parentId, current)
+    byCategory.set(id, current)
   }
 
-  const ranked = [...byParent.values()].sort((a, b) => b.amount - a.amount)
-  const head = ranked.slice(0, VISIBLE_CATEGORIES)
-  const rest = ranked.slice(VISIBLE_CATEGORIES)
-  const categorySpend = rest.length
-    ? [
-        ...head,
-        {
-          name: "Other",
-          amount: rest.reduce((sum, item) => sum + item.amount, 0),
-          color: "var(--chart-5)",
-        },
-      ]
-    : head
+  const categorySpend = [...byCategory.values()]
+    .sort((a, b) => b.amount - a.amount || a.name.localeCompare(b.name))
+    .map((item, index) => ({
+      ...item,
+      color: item.color ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length],
+      share: spent > 0 ? item.amount / spent : 0,
+    }))
 
   return {
     spent,

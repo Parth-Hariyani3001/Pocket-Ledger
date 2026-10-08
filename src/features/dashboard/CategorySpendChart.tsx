@@ -1,4 +1,3 @@
-import { Bar, BarChart, Cell, XAxis, YAxis } from "recharts"
 import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
@@ -10,12 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "@/components/ui/chart"
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -24,70 +17,101 @@ import {
 } from "@/components/ui/empty"
 import { formatINR } from "@/utils/dateCurrencyUtils"
 import type { CategorySpend } from "./summarizeMonth"
-import { usePrefersReducedMotion } from "./usePrefersReducedMotion"
 
-const chartConfig = {
-  amount: {
-    label: "Spent",
-    color: "var(--outflow)",
-  },
-} satisfies ChartConfig
+type SpendGroup = {
+  key: string
+  title: string | null
+  items: CategorySpend[]
+  total: number
+}
+
+function shareLabel(share: number) {
+  const percent = share * 100
+  if (percent > 0 && percent < 1) return "<1%"
+  return `${Math.round(percent)}%`
+}
+
+function spendCaption(categories: CategorySpend[]) {
+  const parentNames = [
+    ...new Set(categories.map((category) => category.parentName).filter(Boolean)),
+  ]
+  const hasRoot = categories.some((category) => category.parentName == null)
+  if (parentNames.length === 1 && !hasRoot) return `Inside ${parentNames[0]}.`
+  return "Each category the money was filed under."
+}
+
+function spendGroups(categories: CategorySpend[]): SpendGroup[] {
+  const groups = new Map<string, SpendGroup>()
+
+  for (const category of categories) {
+    const key =
+      category.parentId != null ? `parent:${category.parentId}` : `category:${category.id}`
+    const group = groups.get(key) ?? {
+      key,
+      title: category.parentName,
+      items: [],
+      total: 0,
+    }
+    group.items.push(category)
+    group.total += category.amount
+    groups.set(key, group)
+  }
+
+  return [...groups.values()].sort((a, b) => b.total - a.total || (a.title ?? "").localeCompare(b.title ?? ""))
+}
+
+function CategoryRow({ category }: { category: CategorySpend }) {
+  return (
+    <li className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-1.5">
+      <span className="truncate">{category.name}</span>
+      <span className="tabular-nums">{formatINR(category.amount)}</span>
+      <div className="col-span-2 flex items-center gap-2">
+        <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-muted" aria-hidden>
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${category.share * 100}%`,
+              minWidth: category.share > 0 ? "3px" : 0,
+              backgroundColor: category.color,
+            }}
+          />
+        </div>
+        <span className="w-10 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+          {shareLabel(category.share)}
+        </span>
+      </div>
+    </li>
+  )
+}
 
 function CategorySpendChart({ categories }: { categories: CategorySpend[] }) {
-  const reduceMotion = usePrefersReducedMotion()
+  const groups = spendGroups(categories)
+  const showHeadings = groups.length > 1
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Where it went</CardTitle>
-        <CardDescription>Spending rolled up to each parent category.</CardDescription>
+        <CardDescription>
+          {categories.length ? spendCaption(categories) : "Spending in this month, by category."}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {categories.length ? (
-          <ChartContainer
-            config={chartConfig}
-            className="aspect-auto w-full"
-            style={{ height: Math.max(categories.length * 40, 160) }}
-          >
-            <BarChart
-              accessibilityLayer
-              data={categories}
-              layout="vertical"
-              margin={{ left: 0, right: 8 }}
-            >
-              <XAxis type="number" hide />
-              <YAxis
-                type="category"
-                dataKey="name"
-                tickLine={false}
-                axisLine={false}
-                width={104}
-                tickFormatter={(value: string) =>
-                  value.length > 14 ? `${value.slice(0, 13)}…` : value
-                }
-              />
-              <ChartTooltip
-                content={
-                  <ChartTooltipContent
-                    hideLabel
-                    formatter={(value, _name, item) => (
-                      <span className="flex flex-1 items-center justify-between gap-4">
-                        <span className="text-muted-foreground">
-                          {String(item.payload?.name ?? "Spent")}
-                        </span>
-                        <span className="tabular-nums">{formatINR(Number(value))}</span>
-                      </span>
-                    )}
-                  />
-                }
-              />
-              <Bar dataKey="amount" radius={4} isAnimationActive={!reduceMotion}>
-                {categories.map((category) => (
-                  <Cell key={category.name} fill={category.color} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ChartContainer>
+          <div className="flex flex-col gap-4">
+            {groups.map((group) => (
+              <div key={group.key} className="flex flex-col gap-3">
+                {showHeadings && group.title ? (
+                  <p className="text-sm text-muted-foreground">{group.title}</p>
+                ) : null}
+                <ul className="flex flex-col gap-3">
+                  {group.items.map((category) => (
+                    <CategoryRow key={category.id} category={category} />
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         ) : (
           <Empty className="min-h-40">
             <EmptyHeader>
