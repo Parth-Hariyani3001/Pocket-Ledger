@@ -1,15 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
+import { refreshLedger } from "@/features/ledger/refreshLedger"
 import { updateTransaction as updateTransactionApi } from "@/services/transactionService"
 import type { TransactionWrite } from "@/types/transactions"
-
-function refreshLedger(queryClient: ReturnType<typeof useQueryClient>) {
-  queryClient.invalidateQueries({ queryKey: ["transactions"] })
-  queryClient.invalidateQueries({ queryKey: ["debts"] })
-  queryClient.invalidateQueries({ queryKey: ["budgets"] })
-  queryClient.invalidateQueries({ queryKey: ["positions"] })
-}
 
 export function useUpdateTransaction() {
   const queryClient = useQueryClient()

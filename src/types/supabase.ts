@@ -179,6 +179,51 @@ export type Database = {
                 }
                 Relationships: []
             }
+            month_balance: {
+                Row: {
+                    borrowed_delta: number
+                    cash_delta: number
+                    lent_delta: number
+                    month: string
+                    net_worth_delta: number
+                    position_delta: number
+                    user_id: string
+                }
+                Insert: {
+                    borrowed_delta: number
+                    cash_delta: number
+                    lent_delta: number
+                    month: string
+                    net_worth_delta?: number
+                    position_delta: number
+                    user_id?: string
+                }
+                Update: {
+                    borrowed_delta?: number
+                    cash_delta?: number
+                    lent_delta?: number
+                    month?: string
+                    net_worth_delta?: number
+                    position_delta?: number
+                    user_id?: string
+                }
+                Relationships: []
+            }
+            month_balance_dirty: {
+                Row: {
+                    month: string
+                    user_id: string
+                }
+                Insert: {
+                    month: string
+                    user_id?: string
+                }
+                Update: {
+                    month?: string
+                    user_id?: string
+                }
+                Relationships: []
+            }
             transaction: {
                 Row: {
                     amount: number
@@ -275,7 +320,10 @@ export type Database = {
             }
         }
         Functions: {
-            [_ in never]: never
+            refresh_month_balances: {
+                Args: Record<PropertyKey, never>
+                Returns: undefined
+            }
         }
         Enums: {
             category_type: "income" | "expense"
