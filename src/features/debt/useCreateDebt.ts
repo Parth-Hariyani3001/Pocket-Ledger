@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 
-import { refreshLedger } from "@/features/ledger/refreshLedger"
 import { createDebt as createDebtApi } from "@/services/debtService"
 
 export function useCreateDebt() {
@@ -11,7 +10,7 @@ export function useCreateDebt() {
     mutationFn: createDebtApi,
     onSuccess: () => {
       toast.success("Debt added")
-      refreshLedger(queryClient)
+      queryClient.invalidateQueries({ queryKey: ["debts"] })
     },
     onError: (err) => {
       toast.error(err.message)

@@ -17,10 +17,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { expenseBudgetBalance } from "@/features/budget/budgetCopy"
 import { useBudgets } from "@/features/budget/useBudgets"
 import CategorySpendChart from "@/features/dashboard/CategorySpendChart"
-import { holdingFor } from "@/features/dashboard/netWorth"
 import MonthFlowChart from "@/features/dashboard/MonthFlowChart"
 import { useMonthActivity } from "@/features/dashboard/useMonthActivity"
-import { useNetWorth } from "@/features/dashboard/useNetWorth"
 import { describePositions, monthLine, positionKindLabel } from "@/features/positions/positionCopy"
 import { usePositions } from "@/features/positions/usePositions"
 import { lineTitle, signedAmount } from "@/features/transactions/transactionCopy"
@@ -31,7 +29,6 @@ import { formatINR } from "@/utils/dateCurrencyUtils"
 function Dashboard() {
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const { summary, label, isLoading } = useMonthActivity(month)
-  const { closings, isLoading: netWorthLoading } = useNetWorth()
   const { transactions, isLoading: transactionsLoading } = useTransactions()
   const { budgets, isLoading: budgetsLoading } = useBudgets()
   const { positions, isLoading: positionsLoading } = usePositions()
@@ -46,8 +43,6 @@ function Dashboard() {
       budget.endDate >= today,
   )
   const budget = viewingNow ? expenseBudgetBalance(activeExpenses) : null
-  const held = holdingFor(closings, format(month, "yyyy-MM-dd"))
-  const heldDetail = viewingNow ? "Held now" : `Held at the end of ${label}`
 
   const figures = [
     {
@@ -105,26 +100,6 @@ function Dashboard() {
           </div>
         }
       />
-
-      {netWorthLoading ? (
-        <Skeleton className="h-20" />
-      ) : held ? (
-        <div className="flex flex-col gap-1">
-          <p
-            className={cn(
-              "font-heading text-[2.15rem] leading-none tracking-[-0.02em] tabular-nums",
-              held.netWorth < 0 && "text-outflow",
-            )}
-          >
-            {formatINR(held.netWorth)}
-          </p>
-          <p className="text-muted-foreground">{heldDetail}</p>
-          <p className="max-w-[68ch] text-muted-foreground">
-            {formatINR(held.cash)} cash, {formatINR(held.positions)} in positions,{" "}
-            {formatINR(held.lent)} still to receive, {formatINR(held.borrowed)} still to pay
-          </p>
-        </div>
-      ) : null}
 
       {isLoading || budgetsLoading ? (
         <div className="grid gap-6 sm:grid-cols-3">
