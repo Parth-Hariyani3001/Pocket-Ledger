@@ -1,7 +1,8 @@
 -- PocketLedger schema.
 -- Categories, budgets, debts, positions, and transactions.
 -- A position is money you still own after it leaves spending: SIP, FD, savings,
--- or an emergency fund. Marks are amounts you type. There is no price feed.
+-- an emergency fund, PF, crypto, stocks, bonds, or a pension. Marks are amounts you type.
+-- There is no price feed.
 --
 -- This script drops and recreates the public ledger tables.
 -- Run it in the Supabase SQL editor of a new project, or only when the existing
@@ -28,7 +29,9 @@ drop type if exists public.category_type;
 
 create type public.category_type as enum ('income', 'expense');
 create type public.debt_type as enum ('borrowed', 'lent');
-create type public.position_kind as enum ('sip', 'fd', 'savings', 'emergency');
+create type public.position_kind as enum (
+  'sip', 'fd', 'savings', 'emergency', 'pf', 'crypto', 'stocks', 'bonds', 'pension'
+);
 create type public.transaction_direction as enum ('inflow', 'outflow');
 
 -- ---------------------------------------------------------------------------

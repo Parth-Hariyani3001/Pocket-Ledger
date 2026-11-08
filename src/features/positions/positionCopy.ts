@@ -7,6 +7,11 @@ const kindLabels: Record<PositionKind, string> = {
   fd: "FD",
   savings: "Savings",
   emergency: "Emergency fund",
+  pf: "PF",
+  crypto: "Crypto",
+  stocks: "Stocks",
+  bonds: "Bonds",
+  pension: "Pension",
 }
 
 export function positionKindLabel(kind: PositionKind) {

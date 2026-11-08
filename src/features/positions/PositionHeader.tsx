@@ -34,6 +34,11 @@ function PositionHeader({ positions, onAdd }: PositionHeaderProps) {
             { label: "FD", value: "fd" },
             { label: "Savings", value: "savings" },
             { label: "Emergency", value: "emergency" },
+            { label: "PF", value: "pf" },
+            { label: "Crypto", value: "crypto" },
+            { label: "Stocks", value: "stocks" },
+            { label: "Bonds", value: "bonds" },
+            { label: "Pension", value: "pension" },
           ]}
         />
       </div>

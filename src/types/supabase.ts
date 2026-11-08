@@ -280,7 +280,7 @@ export type Database = {
         Enums: {
             category_type: "income" | "expense"
             debt_type: "borrowed" | "lent"
-            position_kind: "sip" | "fd" | "savings" | "emergency"
+            position_kind: "sip" | "fd" | "savings" | "emergency" | "pf" | "crypto" | "stocks" | "bonds" | "pension"
             transaction_direction: "inflow" | "outflow"
         }
         CompositeTypes: {
@@ -411,7 +411,7 @@ export const Constants = {
         Enums: {
             category_type: ["income", "expense"],
             debt_type: ["borrowed", "lent"],
-            position_kind: ["sip", "fd", "savings", "emergency"],
+            position_kind: ["sip", "fd", "savings", "emergency", "pf", "crypto", "stocks", "bonds", "pension"],
             transaction_direction: ["inflow", "outflow"],
         },
     },

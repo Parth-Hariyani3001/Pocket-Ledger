@@ -20,7 +20,7 @@ import { positionKindLabel } from "@/features/positions/positionCopy"
 import { usePositions } from "@/features/positions/usePositions"
 import type { PositionKind, PositionWithStatus } from "@/types/position"
 
-const kinds: PositionKind[] = ["sip", "fd", "savings", "emergency"]
+const kinds: PositionKind[] = ["sip", "fd", "savings", "emergency", "pf", "crypto", "stocks", "bonds", "pension"]
 
 function emptyCopy(hasAny: boolean, searching: boolean) {
   if (searching) {
@@ -33,7 +33,7 @@ function emptyCopy(hasAny: boolean, searching: boolean) {
   if (!hasAny) {
     return {
       title: "No positions yet",
-      description: "Add a SIP, an FD, savings, or an emergency fund.",
+      description: "Add a SIP, an FD, savings, an emergency fund, PF, crypto, stocks, bonds, or a pension.",
     }
   }
 

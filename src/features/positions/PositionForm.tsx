@@ -35,7 +35,7 @@ interface PositionFormProps {
   onClose: () => void
 }
 
-const kinds: PositionKind[] = ["sip", "fd", "savings", "emergency"]
+const kinds: PositionKind[] = ["sip", "fd", "savings", "emergency", "pf", "crypto", "stocks", "bonds", "pension"]
 
 function PositionForm({ editingPosition, onClose }: PositionFormProps) {
   const { createPosition, isCreating } = useCreatePosition()
